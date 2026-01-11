@@ -90,6 +90,30 @@ npm run dev
 - AI 协作指引：`create-genshin-ts/templates/start/CLAUDE.md` / `create-genshin-ts/templates/start/AGENTS.md`
 - 函数/事件注释：`node_modules/genshin-ts/dist/src/definitions/`
 
+## TODO (根据实际可行性某些可能会放弃实现, 不分先后顺序)
+
+- 完善ci流程
+- 增加客户端节点图支持
+- 完善文档站
+- 信号与结构体定义和传参 (泛型参数类型提示)
+- 节点图超限自动检测 (3000)
+- 检测地图外部保存自动重注入
+- g.scene()程序化场景定义支持
+- 自动变量挂载支持
+- 节点图json可视化预览器
+- 程序化定义结构体和全局计时器
+- 更多 // @gsts: 装饰优化开关, 例如预编译局部开关
+- await delay支持? (高度不确定)
+- gia转typescript支持
+- npm库的开发模板
+- 生成js map以便更好的错误定位
+- 修正跨文件同id重复的关卡缓存问题
+- jsx控件开发抽象
+- 丰富examples
+- 简化 {} 形式的三维向量数组推断
+- 直接从gil解出自定义元件id到项目内
+- 特效声音等id资源
+
 ## 特别鸣谢
 
 - https://github.com/Wu-Yijun/Genshin-Impact-Miliastra-Wonderland-Code-Node-Editor-Pack

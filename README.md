@@ -90,6 +90,30 @@ See the template guide for the full list and best practices.
 - AI guidance: `create-genshin-ts/templates/start/CLAUDE.md` / `create-genshin-ts/templates/start/AGENTS.md`
 - Function/event notes: `node_modules/genshin-ts/dist/src/definitions/`
 
+## TODO (Some items may be dropped based on feasibility; in no particular order)
+
+- Improve CI pipeline
+- Add client-side node graph support
+- Improve documentation site
+- Signal and struct definitions with parameter passing (generic parameter type hints)
+- Auto-detect node graph limit overflow (3000)
+- Auto re-inject on external map save detection
+- `g.scene()` programmatic scene definition support
+- Auto variable mounting support
+- Node graph JSON visual previewer
+- Programmatic struct and global timer definitions
+- More `// @gsts:` decorator optimization flags, e.g., local precompile toggle
+- `await delay` support? (highly uncertain)
+- GIA to TypeScript conversion support
+- npm library development template
+- Generate JS source maps for better error tracing
+- Fix cross-file duplicate ID level cache issues
+- JSX component development abstraction
+- Expand examples
+- Simplify `{}` style 3D vector array inference
+- Extract custom prefab IDs from GIL directly into project
+- VFX, sound, and other resource IDs
+
 ## Special Thanks
 
 - https://github.com/Wu-Yijun/Genshin-Impact-Miliastra-Wonderland-Code-Node-Editor-Pack
