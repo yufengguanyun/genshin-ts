@@ -8,6 +8,7 @@ on:
       - 'Changelog_ZH.md'
 
 permissions:
+  id-token: write
   contents: write
 
 jobs:
@@ -62,14 +63,10 @@ jobs:
 
       - name: Publish genshin-ts
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
 
       - name: Publish create-genshin-ts
         run: npm publish
         working-directory: create-genshin-ts
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
 
       - uses: actions/download-artifact@v4
         with:
