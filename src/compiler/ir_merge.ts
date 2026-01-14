@@ -224,6 +224,24 @@ function normalizeGraphCompatibility(base: IRDocument, next: IRDocument, _source
     if (!sa && sb) {
       a.sub_type = sb
     }
+
+    // 规则：
+    // - 若只有一个显式填写 mode：用填写的那个
+    // - 若多个显式填写且不一致：报错
+    const ma = a.mode
+    const mb = b.mode
+    if (ma && mb && ma !== mb) {
+      throw new Error(
+        t('err_mergeServerModeMismatch', {
+          id: String(a.id),
+          a: String(ma),
+          b: String(mb)
+        })
+      )
+    }
+    if (!ma && mb) {
+      a.mode = mb
+    }
   }
 }
 

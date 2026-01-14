@@ -14,7 +14,7 @@ import {
 } from '../definitions/zh_aliases.js'
 import type { ExecTailEndpoint, ExecutionFlow } from './execution_flow_types.js'
 import { buildIRDocument } from './ir_builder.js'
-import type { ServerGraphSubType, Variable } from './IR.js'
+import type { ServerGraphMode, ServerGraphSubType, Variable } from './IR.js'
 import type { MetaCallRecord, MetaCallRecordRef } from './meta_call_types.js'
 import { getRuntimeOptions } from './runtime_config.js'
 import { installScopedServerGlobals, installServerGlobals } from './server_globals.js'
@@ -49,13 +49,7 @@ export type IRBuildOptions = {
 
 export type ServerLang = 'en' | 'zh'
 
-export type ServerGraphOptions<Vars extends VariablesDefinition = VariablesDefinition> = {
-  /**
-   * [ZH] 服务器节点图子类型（默认 `实体节点图`）。
-   *
-   * [EN] Server graph sub type (default: `entity`).
-   */
-  type?: ServerGraphSubType
+type ServerGraphOptionsBase<Vars extends VariablesDefinition = VariablesDefinition> = {
   /**
    * [ZH] 节点图 ID（NodeGraph.id）。
    *
@@ -97,6 +91,36 @@ export type ServerGraphOptions<Vars extends VariablesDefinition = VariablesDefin
    */
   lang?: ServerLang
 }
+
+export type ServerGraphOptions<Vars extends VariablesDefinition = VariablesDefinition> =
+  | (ServerGraphOptionsBase<Vars> & {
+      /**
+       * [ZH] 节点图模式（默认超限模式 Beyond Mode）。
+       *
+       * [EN] Graph mode (default: Beyond Mode).
+       */
+      mode?: 'beyond'
+      /**
+       * [ZH] 服务器节点图子类型（默认 `实体节点图`）。
+       *
+       * [EN] Server graph sub type (default: `entity`).
+       */
+      type?: ServerGraphSubType
+    })
+  | (ServerGraphOptionsBase<Vars> & {
+      /**
+       * [ZH] 节点图模式（经典模式 Classic Mode）。
+       *
+       * [EN] Graph mode (Classic Mode).
+       */
+      mode: 'classic'
+      /**
+       * [ZH] 服务器节点图子类型（默认 `实体节点图`；经典模式不允许 `class`）。
+       *
+       * [EN] Server graph sub type (default: `entity`; Classic Mode disallows `class`).
+       */
+      type?: Exclude<ServerGraphSubType, 'class'>
+    })
 
 export type ServerExecutionFlowFunctionsWithVars<Vars extends VariablesDefinition> = Omit<
   ServerExecutionFlowFunctions,
@@ -157,6 +181,7 @@ export type ServerGraphApi<
 }
 
 const SERVER_GRAPH_TYPES = new Set<ServerGraphSubType>(['entity', 'status', 'class', 'item'])
+const SERVER_GRAPH_MODES = new Set<ServerGraphMode>(['beyond', 'classic'])
 
 function resolveServerGraphType(type?: ServerGraphSubType): ServerGraphSubType {
   const resolved = type ?? 'entity'
@@ -164,6 +189,20 @@ function resolveServerGraphType(type?: ServerGraphSubType): ServerGraphSubType {
     throw new Error(`[error] invalid server graph sub type: ${String(type)}`)
   }
   return resolved
+}
+
+function resolveServerGraphMode(mode?: ServerGraphMode): ServerGraphMode {
+  const resolved = mode ?? 'beyond'
+  if (!SERVER_GRAPH_MODES.has(resolved)) {
+    throw new Error(`[error] invalid server graph mode: ${String(mode)}`)
+  }
+  return resolved
+}
+
+function assertServerGraphModeCompatible(mode: ServerGraphMode, type: ServerGraphSubType) {
+  if (mode === 'classic' && type === 'class') {
+    throw new Error('[error] classic mode does not allow class graph type')
+  }
 }
 
 export type GstsCtxType =
@@ -293,6 +332,7 @@ export class MetaCallRegistry {
   private flows: ExecutionFlow[] = []
   private flowStack: number[] = []
   private readonly graphType: ServerGraphSubType
+  private readonly graphMode: ServerGraphMode
   private readonly graphId?: number
   private readonly graphName?: string
   private readonly prefixName: boolean
@@ -310,6 +350,7 @@ export class MetaCallRegistry {
 
   constructor(
     graphType: ServerGraphSubType = 'entity',
+    graphMode: ServerGraphMode = 'beyond',
     graphId?: number,
     graphName?: string,
     prefixName: boolean = true,
@@ -317,6 +358,7 @@ export class MetaCallRegistry {
     variableMetaByName: Map<string, NodeGraphVariableMeta> = new Map()
   ) {
     this.graphType = graphType
+    this.graphMode = graphMode
     this.graphId = graphId
     this.graphName = graphName
     this.prefixName = prefixName
@@ -631,6 +673,10 @@ export class MetaCallRegistry {
     return this.graphType
   }
 
+  getGraphMode(): ServerGraphMode {
+    return this.graphMode
+  }
+
   /**
    * 获取当前 flow 的 return gate 局部变量（不存在则创建：Get Local Variable(false)）。
    * 用于：return() 标记 + 循环 complete 处的 return gate。
@@ -690,11 +736,14 @@ function server<Vars extends VariablesDefinition = VariablesDefinition>(
 ) {
   type ResolvedLang = ServerLang
   const graphType = resolveServerGraphType(options?.type)
+  const graphMode = resolveServerGraphMode(options?.mode)
+  assertServerGraphModeCompatible(graphMode, graphType)
   const lang = options?.lang ?? 'en'
   const useZhAliases = lang === 'zh'
   const { variables, metaByName } = parseVariableDefinitions(options?.variables)
   const registry = new MetaCallRegistry(
     graphType,
+    graphMode,
     options?.id,
     options?.name,
     options?.prefix !== false,
@@ -880,6 +929,7 @@ export function buildServerGraphRegistriesIRDocuments(opts: IRBuildOptions = {})
       flows: optimizedFlows,
       variables: registry.getVariables(),
       serverSubType: registry.getGraphType(),
+      serverMode: registry.getGraphMode(),
       graphId: registry.getGraphId(),
       graphName: resolveName(registry)
     })

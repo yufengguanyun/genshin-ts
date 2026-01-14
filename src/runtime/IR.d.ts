@@ -31,12 +31,15 @@ export type ClientIRDocument = SimplifyDeep<
 >
 
 export type ServerGraphSubType = 'entity' | 'status' | 'class' | 'item'
+export type ServerGraphMode = 'beyond' | 'classic'
 
 export interface ServerGraphInfo {
   // 默认基于脚本文件名
   name?: string
   id?: number
   type: 'server'
+  // 节点图模式（默认超限模式）
+  mode?: ServerGraphMode
   sub_type?: ServerGraphSubType
 }
 

@@ -192,6 +192,7 @@ export function buildIRDocument(input: IRBuildInput): IRDocument {
     ir_type: 'node_graph',
     graph: {
       type: 'server',
+      mode: input.serverMode ?? 'beyond',
       sub_type: input.serverSubType ?? 'entity',
       id: input.graphId,
       name: input.graphName

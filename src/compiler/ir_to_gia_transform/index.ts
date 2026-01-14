@@ -3,6 +3,7 @@ import type {
   Argument,
   ConnectionArgument,
   IRDocument,
+  ServerGraphMode as ServerGraphRuntimeMode,
   ServerGraphSubType,
   ValueType,
   Variable
@@ -158,6 +159,28 @@ function resolveServerGraphMode(graphType: ServerGraphSubType | undefined): Serv
   }
 }
 
+const SERVER_GRAPH_RUNTIME_MODES = new Set<ServerGraphRuntimeMode>(['beyond', 'classic'])
+
+function resolveServerGraphRuntimeMode(
+  mode: ServerGraphRuntimeMode | undefined
+): ServerGraphRuntimeMode {
+  const resolved = mode ?? 'beyond'
+  if (!SERVER_GRAPH_RUNTIME_MODES.has(resolved)) {
+    throw new Error(`[error] invalid server graph mode: ${String(mode)}`)
+  }
+  return resolved
+}
+
+function assertServerGraphRuntimeModeCompatible(
+  mode: ServerGraphRuntimeMode,
+  subType: ServerGraphSubType | undefined
+) {
+  const resolvedSubType = subType ?? 'entity'
+  if (mode === 'classic' && resolvedSubType === 'class') {
+    throw new Error('[error] classic mode does not allow class graph type')
+  }
+}
+
 export function irToGia(ir: IRDocument, opts: IrToGiaOptions): Uint8Array {
   const graphId = opts.graphId ?? ir.graph?.id ?? 1073741825
   const name = opts.name ?? ir.graph?.name ?? '_GSTS_Generated_Graph'
@@ -174,10 +197,15 @@ export function irToGia(ir: IRDocument, opts: IrToGiaOptions): Uint8Array {
   ir = optimizeTimerDispatchAggregate(ir, timerDispatchAggregate)
 
   const graphInfo = buildExecutionGraph(ir.nodes!)
-  const serverMode = resolveServerGraphMode(
-    ir.graph.type === 'server' ? ir.graph.sub_type : undefined
-  )
+  const serverSubType = ir.graph.type === 'server' ? ir.graph.sub_type : undefined
+  const serverMode = resolveServerGraphMode(serverSubType)
+  const graphRuntimeMode = ir.graph.type === 'server' ? ir.graph.mode : undefined
+  const resolvedRuntimeMode = resolveServerGraphRuntimeMode(graphRuntimeMode)
+  assertServerGraphRuntimeModeCompatible(resolvedRuntimeMode, serverSubType)
   const graph: GiaGraph = new Graph<ServerGraphMode>(serverMode, uid, name, graphId)
+  if (resolvedRuntimeMode === 'classic') {
+    graph.rootModeFlag = 1
+  }
   const nodesById = new Map<NodeId, GiaNode>()
   const positions = layoutPositions(ir.nodes!, graphInfo)
   const connIndex = buildConnTypeIndex(ir)
