@@ -20,6 +20,8 @@ export interface Root {
   accessories: GraphUnit[]
   /** Index = 3 */
   filePath: string
+  /** Index = 4 */
+  modeFlag?: number
   /** Index = 5 */
   gameVersion: string
 }

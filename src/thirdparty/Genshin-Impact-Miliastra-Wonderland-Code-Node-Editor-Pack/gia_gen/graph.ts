@@ -60,6 +60,8 @@ export class Graph<M extends AllModes = 'server'> {
   uid: number
   private graph_id: number
   private file_id: number
+  /** Root#4: observed as 1 for classic mode */
+  rootModeFlag?: number
   private counter_idx: Counter
   private counter_dyn_id: Counter
   private nodes: Set<Node<M>>
@@ -314,7 +316,8 @@ export class Graph<M extends AllModes = 'server'> {
       nodes,
       mode: this.mode,
       comments: this.get_graph_comments().map((c) => c.encode()),
-      graphValues: graphValues
+      graphValues: graphValues,
+      modeFlag: this.rootModeFlag
     })
   }
   static decode(root: Root): Graph {
@@ -322,6 +325,9 @@ export class Graph<M extends AllModes = 'server'> {
     const name = file_name.endsWith('.gia') ? file_name.slice(1, -4) : file_name.slice(1)
     // TODO: discriminate mode!
     const graph = new Graph('server', parseInt(uid), name, parseInt(graph_id_str))
+    if ((root as { modeFlag?: number }).modeFlag !== undefined) {
+      graph.rootModeFlag = (root as { modeFlag?: number }).modeFlag
+    }
     const graph_vars = get_graph_vars(root.graph.graph?.inner.graph!)
     graph_vars.forEach((v) => graph.graph_var.set(v.name, v))
     root.graph.graph?.inner.graph.nodes.forEach((node) => {

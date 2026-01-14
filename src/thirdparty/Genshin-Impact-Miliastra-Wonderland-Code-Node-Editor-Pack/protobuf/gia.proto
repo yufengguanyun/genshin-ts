@@ -6,7 +6,8 @@ message Root {
   GraphUnit graph = 1;                // graph info
   repeated GraphUnit accessories = 2; // data_structure, input/output
   string filePath = 3;    // {UID}-{TIME}-{LEVEL_ID}-\{FILE_NAME}.gia
-  string gameVersion = 5; // 6.2.0 by now
+  optional uint32 modeFlag = 4; // observed: classic mode uses 1, Beyond Mode omitted
+  string gameVersion = 5; // 6.3.0 by now
 }
 
 message GraphUnit {

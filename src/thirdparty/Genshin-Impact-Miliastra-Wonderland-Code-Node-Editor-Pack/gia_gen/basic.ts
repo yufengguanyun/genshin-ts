@@ -30,7 +30,7 @@ import type { AnyType, GraphVar } from './graph.js'
 import { get_id, get_type, type NodePins, type NodeType } from './nodes.js'
 import { assert, counter_dynamic_id, counter_index, randomInt, todo } from './utils.js'
 
-const gameVersion = '6.2.0'
+const gameVersion = '6.3.0'
 
 type GraphMode = 'server' | 'status' | 'class' | 'item' | 'composite'
 
@@ -51,6 +51,8 @@ export interface GraphBody_ {
   comments?: Comments[]
   graphValues?: GraphVariable[]
   mode?: GraphMode
+  /** Root#4: observed as 1 for classic mode */
+  modeFlag?: number
 }
 /**
  * 根据提供的参数构建一个图对象 (Root)
@@ -123,6 +125,9 @@ export function graph_body(body: GraphBody_): Root {
     accessories: [],
     filePath,
     gameVersion
+  }
+  if (body.modeFlag !== undefined) {
+    gia.modeFlag = body.modeFlag
   }
   return gia
 }
