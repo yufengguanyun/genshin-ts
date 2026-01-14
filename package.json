@@ -5,6 +5,10 @@
   "type": "module",
   "author": "josStorer <josstorer@outlook.com> (https://github.com/josStorer)",
   "homepage": "https://gsts.moe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/josStorer/genshin-ts"
+  },
   "keywords": [
     "genshin",
     "genshin-ts",
