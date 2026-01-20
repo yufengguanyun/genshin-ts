@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.3
+
+- The type system now automatically constrains node availability between Beyond Mode and Classic Mode
+- Support placeholder methods like dict(0) and list(0) to allow empty argument pins in some nodes
+- Added more detailed hover docs and usage notes for helper functions like raw/float/int/guid/list/dict
+- Added a new Classic Mode node: `Revive Active Character`
+- Fixed an error when creating the `Teleport Player` node in Classic Mode
+
 ## v0.1.2
 
 - g.server() now accepts a mode field to switch between Beyond Mode and Classic Mode
