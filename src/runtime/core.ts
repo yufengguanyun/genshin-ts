@@ -789,7 +789,7 @@ function server<Vars extends VariablesDefinition = VariablesDefinition>(
 ): ServerGraphApi<Vars, ServerLang, ServerGraphMode>
 function server<Vars extends VariablesDefinition = VariablesDefinition>(
   options?: ServerGraphOptions<Vars>
-) {
+): any {
   type ResolvedLang = ServerLang
   type ResolvedMode = ServerGraphMode
   const graphType = resolveServerGraphType(options?.type)
